@@ -39,35 +39,32 @@ void ClientInterface::connectedToServer()   //слот подключения к
         if (newUsername.isEmpty()) QMessageBox::warning(nullptr, "Предупреждение", "Имя не было введено!");
     } while (newUsername.isEmpty());    //пока логин не будет введен
     chatClient->sendLogin(newUsername);   //отправка логина на сервер
-    lastUserName = newUsername;
     //разблокировка элементов окна
     ui->send->setEnabled(true);
     ui->message->setEnabled(true);
     ui->chat->setEnabled(true);
-    lastUserName.clear();
 }
 
-void ClientInterface::messageReceived(QString sender, QString text)   //слот получения сообщения
+void ClientInterface::messageReceived(QString text)   //слот получения сообщения
 {
-    int newRow = chatModel->rowCount();   //сохранение количества строк в чате
-    if (lastUserName != sender) //если отправитель сообщения изменился
-        lastUserName = sender;    //меняем логин последнего отправителя
-    QFont boldFont;
-    boldFont.setBold(true); //задаем жирный шрифт для вывода отправителя
-    chatModel->insertRows(newRow, 2); //добавление строк в выводе чата
-    chatModel->setData(chatModel->index(newRow, 0), sender + ':');  //вывод отправителя
-    chatModel->setData(chatModel->index(newRow, 0), int(Qt::AlignLeft | Qt::AlignVCenter), Qt::TextAlignmentRole);  //выравнивание текста
-    chatModel->setData(chatModel->index(newRow, 0), boldFont, Qt::FontRole);    //задаем жирный шрифт
-    ++newRow;   //переход на новую строку
-    //вывод текста сообщения
-    chatModel->setData(chatModel->index(newRow, 0), text);
-    chatModel->setData(chatModel->index(newRow, 0), int(Qt::AlignLeft | Qt::AlignVCenter), Qt::TextAlignmentRole);
-    ui->chat->scrollToBottom();
+    int index = text.indexOf(":");  //индекс разделения логина отправителя и сообщения
+    if (text.split(":").at(0)=="CONNECT")
+        ui->userBox->addItem(text.remove(0, index+1));
+    else if (text.split(":").at(0)=="DISCONNECT")
+        ui->userBox->removeItem(ui->userBox->findText(text.remove(0, index+1)));
+    else{
+        int newRow = chatModel->rowCount();   //сохранение количества строк в чате
+        chatModel->insertRows(newRow, 2); //добавление строк в выводе чата
+        chatModel->setData(chatModel->index(newRow, 0), text);
+        chatModel->setData(chatModel->index(newRow, 0), int(Qt::AlignLeft | Qt::AlignVCenter), Qt::TextAlignmentRole);
+        ui->chat->scrollToBottom();
+    }
 }
 
 void ClientInterface::sendMessage() //слот отправки сообщения
 {
-    chatClient->sendMessage(ui->message->text()); //вызов слота отправки из объекта логики
+    if (ui->userBox->count()==0) return;
+    chatClient->sendMessage(ui->userBox->currentText()+":"+ui->message->text()); //вызов слота отправки из объекта логики
     const int newRow = chatModel->rowCount();   //сохранение количества строк в чате
     //вывод текста отправленного сообщения
     chatModel->insertRow(newRow);
@@ -75,7 +72,6 @@ void ClientInterface::sendMessage() //слот отправки сообщени
     chatModel->setData(chatModel->index(newRow, 0), int(Qt::AlignRight | Qt::AlignVCenter), Qt::TextAlignmentRole);
     ui->message->clear();
     ui->chat->scrollToBottom();
-    lastUserName.clear();
 }
 
 void ClientInterface::disconnectedFromServer() //слот отключения от сервера
@@ -86,7 +82,6 @@ void ClientInterface::disconnectedFromServer() //слот отключения �
     ui->message->setEnabled(false);
     ui->chat->setEnabled(false);
     ui->connect->setEnabled(true);
-    lastUserName.clear();
 }
 
 

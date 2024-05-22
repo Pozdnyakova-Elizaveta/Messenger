@@ -27,7 +27,7 @@ private slots:
 signals:
     void connected();   //сигнал подключения к серверу
     void disconnected();    //сигнал отключения от сервера
-    void messageReceived(QString sender, QString text);   //сигнал получения сообщения
+    void messageReceived(QString text);   //сигнал получения сообщения
 private:
     QTcpSocket *clientSocket; //сокет клиента
 };

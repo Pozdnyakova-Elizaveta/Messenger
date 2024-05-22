@@ -29,9 +29,12 @@ void Client::connectToServer()     //слот для подключения к �
 }
 void Client::onReadyRead() //слот для реакции на наличие данных в сокете
 {
-    //считывание данных с сокета
-    QByteArray byteArray = clientSocket->readAll();
-    QString data = QString::fromUtf8(byteArray);
-    int index = data.indexOf(":");  //индекс разделения логина отправителя и сообщения
-    emit messageReceived(data.split(":").at(0), data.remove(0, index + 1));
+    QTextStream in(clientSocket);
+    in.setCodec("UTF-8");
+    while (!in.atEnd()) {
+        QByteArray byteArray = clientSocket->readLine();
+        QString data = QString::fromUtf8(byteArray);
+        if (data.endsWith("\n")) data.chop(1);
+        messageReceived(data);
+    }
 }

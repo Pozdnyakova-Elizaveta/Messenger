@@ -13,6 +13,7 @@ bool Server::setSocketDescriptor(qintptr socketDescriptor)
 }
 void Server::disconnectFromClient()    //слот отключения клиента
 {
+    emit sendEveryone("DISCONNECT:"+userName);
     serverSocket->disconnectFromHost();
 }
 
@@ -26,12 +27,13 @@ void Server::receiveMessage()  //слот получения сообщения
     QString data = QString::fromUtf8(byteArray);
     if (data.split(" ").at(0)=="LOGIN"){    //если получили логин
         int index = data.indexOf(" ");
-        if (!data.remove(0, index + 1).isEmpty())   //и он не пустой - сохраняем логин
+        if (!data.remove(0, index + 1).isEmpty()){   //и он не пустой - сохраняем логин
             userName = data;
+            emit sendEveryone("CONNECT:"+userName);
+        }
     }
-    else{   //иначе - обычное сообщение, отправляем клиентам
-        data.prepend(userName+":");
-        emit sendEveryone(data);
+    else{
+        emit searchClient(data);
     }
 }
 void Server::sendToClient(QString str){ //метод отправки клиентам сообщения

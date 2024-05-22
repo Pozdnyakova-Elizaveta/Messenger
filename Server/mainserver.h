@@ -14,6 +14,7 @@ public slots:
     void stopServer();  //слот отключения сервера
 private slots:
     void sendEveryone(QString message);    //слот отправки сообщений всем пользователям
+    void searchClient(QString message);
 private:
     QVector<Server *> clients;    //список подключенных клиентов
 };
