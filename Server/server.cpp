@@ -14,6 +14,8 @@ bool Server::setSocketDescriptor(qintptr socketDescriptor)
 void Server::disconnectFromClient()    //слот отключения клиента
 {
     emit sendEveryone("DISCONNECT:"+userName);
+    emit disconnectedFromClient();
+    qDebug()<<"Отключение";
     serverSocket->disconnectFromHost();
 }
 
@@ -33,7 +35,7 @@ void Server::receiveMessage()  //слот получения сообщения
         }
     }
     else{
-        emit searchClient(data);
+        emit searchClient(userName, data);
     }
 }
 void Server::sendToClient(QString str){ //метод отправки клиентам сообщения

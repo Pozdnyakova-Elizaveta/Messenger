@@ -23,6 +23,7 @@ private:
     Ui::ClientInterface *ui;    //объект графического интерфейса
     Client *chatClient;   //объект логики клиента
     QStandardItemModel *chatModel;    //модель для представления данных, в нашем случае - вывода сообщений
+    QString name;
 private slots:
     void connectedToServer();   //слот подключения к серверу
     void messageReceived(QString text);   //слот получения сообщения

@@ -23,7 +23,8 @@ void MainServer::incomingConnection(qintptr socketDescriptor)   //метод п�
     }
     //установка соединений сигналов объекта сервера для подключения клиентов со слотами основного сервера чата
     connect(server, SIGNAL(sendEveryone(QString)), this, SLOT(sendEveryone(QString)));
-    connect(server, SIGNAL(searchClient(QString)), this, SLOT(searchClient(QString)));
+    connect(server, SIGNAL(searchClient(QString, QString)), this, SLOT(searchClient(QString, QString)));
+    connect(server, &Server::disconnectedFromClient, this, std::bind(&MainServer::disconnectClient, this, server));
     for (Server *worker : clients) {
         server->sendToClient("CONNECT:"+worker->getUserName()+"\n");
     }
@@ -47,13 +48,16 @@ void MainServer::stopServer()  //слот отключения сервера
     }
     close();
 }
-void MainServer::searchClient(QString message){
+void MainServer::searchClient(QString sender, QString message){
     int index = message.indexOf(":");
     QString login = message.split(":").at(0);
     qDebug()<<"Ищем:"<<login;
     for (Server *worker : clients) {
         if (worker->getUserName()==login)
-            worker->sendToClient(message.remove(0, index + 1));
+            worker->sendToClient(sender+message.remove(0, index));
     }
+}
+void MainServer::disconnectClient(Server* sender){
+    clients.removeAll(sender);
 }
 

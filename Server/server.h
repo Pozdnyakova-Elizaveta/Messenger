@@ -20,7 +20,7 @@ public:
     void sendToClient(QString str); //отправка сообщения клиенту
 signals:
     void sendEveryone(QString str); //сигнал отправки сообщения
-    void searchClient(QString str); //сигнал отправки сообщения
+    void searchClient(QString sender, QString str); //сигнал отправки сообщения
     void messageReceived(QString str);  //сигнал получения сообщения
     void disconnectedFromClient();  //сигнал отключения клиента
 public slots:
