@@ -24,10 +24,12 @@ private:
     Client *chatClient;   //объект логики клиента
     QStandardItemModel *chatModel;    //модель для представления данных, в нашем случае - вывода сообщений
     QString name;
+    QString nameSender;
 private slots:
     void connectedToServer();   //слот подключения к серверу
     void messageReceived(QString text);   //слот получения сообщения
     void attemptConnection();   //слот вызова подключения к серверу
+    void clearChat();
     void sendMessage(); //слот отправки сообщения
     void disconnectedFromServer(); //слот отключения от сервера
 };

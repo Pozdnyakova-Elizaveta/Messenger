@@ -6,10 +6,6 @@
 #include <QDataStream>
 #include <QTime>
 #include <QDataStream>
-#include <QJsonParseError>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonValue>
 
 class Client : public QObject   //класс логики клиента
 {

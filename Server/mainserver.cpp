@@ -4,10 +4,9 @@ MainServer::MainServer(QObject *parent)
     : QTcpServer(parent)
 {
     //задаем ip-адрес и порт
-    QHostAddress ipAddress("127.0.0.1");
     quint16 port = 2323;
-    if(this->listen(ipAddress, port)) {
-        qDebug() << "Сервер начал работу, IP-адрес:" << ipAddress.toString() << " порт:" << port;
+    if(this->listen(QHostAddress::Any, port)) {
+        qDebug() << "Сервер начал работу";
     } else {
         qDebug() << "Ошибка запуска сервера";
     }

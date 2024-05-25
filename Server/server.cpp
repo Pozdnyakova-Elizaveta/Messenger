@@ -5,7 +5,7 @@ Server::Server(QObject *parent)
     , serverSocket(new QTcpSocket(this))
 {
     connect(serverSocket, &QTcpSocket::readyRead, this, &Server::receiveMessage); //установка соединения для чтения сообщений
-    connect(serverSocket, &QTcpSocket::disconnected, this, &Server::disconnectedFromClient);  //установка соединения для отключения клиента
+    connect(serverSocket, &QTcpSocket::disconnected, this, &Server::disconnectFromClient);  //установка соединения для отключения клиента
 }
 bool Server::setSocketDescriptor(qintptr socketDescriptor)
 {
@@ -14,8 +14,7 @@ bool Server::setSocketDescriptor(qintptr socketDescriptor)
 void Server::disconnectFromClient()    //слот отключения клиента
 {
     emit sendEveryone("DISCONNECT:"+userName);
-    emit disconnectedFromClient();
-    qDebug()<<"Отключение";
+    emit disconnectedFromClient(this);
     serverSocket->disconnectFromHost();
 }
 

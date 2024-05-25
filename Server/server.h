@@ -4,9 +4,6 @@
 #include <QObject>
 #include <QTcpSocket>
 #include <QDataStream>
-#include <QJsonDocument>
-#include <QJsonParseError>
-#include <QJsonObject>
 
 
 class Server : public QObject   //класс сервера для взаимодействия с клиентом
@@ -22,7 +19,7 @@ signals:
     void sendEveryone(QString str); //сигнал отправки сообщения
     void searchClient(QString sender, QString str); //сигнал отправки сообщения
     void messageReceived(QString str);  //сигнал получения сообщения
-    void disconnectedFromClient();  //сигнал отключения клиента
+    void disconnectedFromClient(Server* server);  //сигнал отключения клиента
 public slots:
     void disconnectFromClient();    //слот отключения клиента
 private slots:

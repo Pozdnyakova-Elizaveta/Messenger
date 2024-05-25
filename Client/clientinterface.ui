@@ -75,8 +75,8 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>20</y>
+     <x>20</x>
+     <y>40</y>
      <width>231</width>
      <height>17</height>
     </rect>
@@ -88,11 +88,24 @@
   <widget class="QComboBox" name="userBox">
    <property name="geometry">
     <rect>
-     <x>280</x>
-     <y>10</y>
+     <x>270</x>
+     <y>40</y>
      <width>211</width>
      <height>25</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="userName">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>10</y>
+     <width>54</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
  </widget>

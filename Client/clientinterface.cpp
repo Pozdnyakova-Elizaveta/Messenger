@@ -22,6 +22,7 @@ ClientInterface::ClientInterface(QWidget *parent)
     connect(ui->send, &QPushButton::clicked, this, &ClientInterface::sendMessage);  //отправка сообщений по нажатию кнопки
     connect(ui->message, &QLineEdit::returnPressed, this, &ClientInterface::sendMessage);  //отправка сообщений по нажатию enter в lineEdit
     connect(ui->connect, &QPushButton::clicked, this, &ClientInterface::attemptConnection); //подключение к серверу по нажатию кнопки
+    connect(ui->userBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ClientInterface::clearChat);
 }
 ClientInterface::~ClientInterface()
 {
@@ -40,6 +41,7 @@ void ClientInterface::connectedToServer()   //слот подключения к
     } while (newUsername.isEmpty());    //пока логин не будет введен
     name = newUsername;
     chatClient->sendLogin(newUsername);   //отправка логина на сервер
+    ui->userName->setText(name);
     //разблокировка элементов окна
     ui->send->setEnabled(true);
     ui->message->setEnabled(true);
@@ -51,12 +53,14 @@ void ClientInterface::messageReceived(QString text)   //слот получен�
     int index = text.indexOf(":");  //индекс разделения логина отправителя и сообщения
     if (text.split(":").at(0)=="CONNECT")
         ui->userBox->addItem(text.remove(0, index+1));
-    else if (text.split(":").at(0)=="DISCONNECT"){
-        ui->userBox->removeItem(ui->userBox->findText(text.remove(index, text.size())));
-        qDebug()<<"Удаление";
-    }
+    else if (text.split(":").at(0)=="DISCONNECT")
+        ui->userBox->removeItem(ui->userBox->findText(text.remove(0, index+1)));
     else{
         QString sender = text.split(":").at(0);
+        if (nameSender!=sender && !nameSender.isEmpty()){
+            clearChat();
+        }
+        nameSender = sender;
         int newRow = chatModel->rowCount();   //сохранение количества строк в чате
         QFont boldFont;
         boldFont.setBold(true);
@@ -97,6 +101,9 @@ void ClientInterface::disconnectedFromServer() //слот отключения �
     ui->message->setEnabled(false);
     ui->chat->setEnabled(false);
     ui->connect->setEnabled(true);
+    ui->userBox->setEnabled(false);
 }
-
+void ClientInterface::clearChat(){
+    chatModel->removeRows(0, chatModel->rowCount());
+}
 
