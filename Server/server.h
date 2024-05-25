@@ -20,6 +20,7 @@ signals:
     void searchClient(QString sender, QString str); //сигнал отправки сообщения
     void messageReceived(QString str);  //сигнал получения сообщения
     void disconnectedFromClient(Server* server);  //сигнал отключения клиента
+    void logMessage(QString str);
 public slots:
     void disconnectFromClient();    //слот отключения клиента
 private slots:

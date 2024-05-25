@@ -2,7 +2,6 @@
 #define SERVERINTERFACE_H
 
 #include <QWidget>
-#include <QMessageBox>
 #include "mainserver.h"
 namespace Ui {
 class ServerInterface;
@@ -19,6 +18,8 @@ public:
 private:
     Ui::ServerInterface *ui;    //объект графического интерфейса
     MainServer *mainServer;   //основной объект сервера
+public slots:
+    void outputLogMessage(QString message);
 };
 
 #endif // SERVERINTERFACE_H

@@ -46,6 +46,8 @@ void ClientInterface::connectedToServer()   //слот подключения к
     ui->send->setEnabled(true);
     ui->message->setEnabled(true);
     ui->chat->setEnabled(true);
+    ui->connect->setEnabled(false);
+    ui->connect->setVisible(false);
 }
 
 void ClientInterface::messageReceived(QString text)   //слот получения сообщения
@@ -68,9 +70,13 @@ void ClientInterface::messageReceived(QString text)   //слот получен�
         chatModel->setData(chatModel->index(newRow, 0), sender + QLatin1Char(':'));
         chatModel->setData(chatModel->index(newRow, 0), int(Qt::AlignLeft | Qt::AlignVCenter), Qt::TextAlignmentRole);
         chatModel->setData(chatModel->index(newRow, 0), boldFont, Qt::FontRole);
+        auto item = chatModel->item(newRow, 0);
+        item->setFlags(item->flags() &= ~Qt::ItemIsEditable);
         ++newRow;
         chatModel->setData(chatModel->index(newRow, 0), text.remove(0,index+1));
         chatModel->setData(chatModel->index(newRow, 0), int(Qt::AlignLeft | Qt::AlignVCenter), Qt::TextAlignmentRole);
+        item = chatModel->item(newRow, 0);
+        item->setFlags(item->flags() &= ~Qt::ItemIsEditable);
         ui->chat->scrollToBottom();
     }
 }
@@ -86,10 +92,14 @@ void ClientInterface::sendMessage() //слот отправки сообщени
     chatModel->setData(chatModel->index(newRow, 0), name + QLatin1Char(':'));
     chatModel->setData(chatModel->index(newRow, 0), int(Qt::AlignRight | Qt::AlignVCenter), Qt::TextAlignmentRole);
     chatModel->setData(chatModel->index(newRow, 0), boldFont, Qt::FontRole);
+    auto item = chatModel->item(newRow, 0);
+    item->setFlags(item->flags() &= ~Qt::ItemIsEditable);
     ++newRow;
     chatModel->setData(chatModel->index(newRow, 0), ui->message->text());
     chatModel->setData(chatModel->index(newRow, 0), int(Qt::AlignRight | Qt::AlignVCenter), Qt::TextAlignmentRole);
     ui->message->clear();
+    item = chatModel->item(newRow, 0);
+    item->setFlags(item->flags() &= ~Qt::ItemIsEditable);
     ui->chat->scrollToBottom();
 }
 
@@ -101,6 +111,7 @@ void ClientInterface::disconnectedFromServer() //слот отключения �
     ui->message->setEnabled(false);
     ui->chat->setEnabled(false);
     ui->connect->setEnabled(true);
+    ui->connect->setVisible(true);
     ui->userBox->setEnabled(false);
 }
 void ClientInterface::clearChat(){

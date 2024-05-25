@@ -25,7 +25,7 @@ void Client::disconnectFromServer()  //слот для отключения от
 }
 void Client::connectToServer()     //слот для подключения к серверу
 {
-    clientSocket->connectToHost("192.168.56.1", 2323);
+    clientSocket->connectToHost("127.0.0.1", 2323);
 }
 void Client::onReadyRead() //слот для реакции на наличие данных в сокете
 {

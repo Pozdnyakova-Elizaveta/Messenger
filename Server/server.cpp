@@ -31,6 +31,7 @@ void Server::receiveMessage()  //слот получения сообщения
         if (!data.remove(0, index + 1).isEmpty()){   //и он не пустой - сохраняем логин
             userName = data;
             emit sendEveryone("CONNECT:"+userName);
+            emit logMessage("Подключение нового пользователя: " + userName);
         }
     }
     else{
