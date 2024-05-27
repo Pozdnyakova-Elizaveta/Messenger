@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTcpSocket>
+#include <QUdpSocket>
 #include <QDataStream>
 #include <QTime>
 #include <QDataStream>
@@ -18,6 +19,7 @@ public slots:
     void sendLogin(QString userName);    //слот для отправки логина
     void sendMessage(QString text);  //слот для отправки сообщения
     void disconnectFromServer();  //слот для отключения от сервера
+    void sendDatagram();
 private slots:
     void onReadyRead(); //слот для реакции на наличие данных в сокете
 signals:
@@ -26,6 +28,7 @@ signals:
     void messageReceived(QString text);   //сигнал получения сообщения
 private:
     QTcpSocket *clientSocket; //сокет клиента
+    QUdpSocket *udpClientSocket; //сокет клиента
 };
 
 #endif // CLIENT_H

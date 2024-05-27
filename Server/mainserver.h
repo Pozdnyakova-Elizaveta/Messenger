@@ -2,6 +2,7 @@
 #define MAINSERVER_H
 
 #include <QTcpServer>
+#include <QUdpSocket>
 #include <QDateTime>
 #include "server.h"
 #include <QFile>
@@ -18,10 +19,12 @@ private slots:
     void searchClient(QString sender, QString message);
     void disconnectClient(Server* sender);
     void sendLogMessage(QString message);
+    void udpAnswer();
 signals:
     void logMessage(QString message);
 private:
     QVector<Server *> clients;    //список подключенных клиентов
+    QUdpSocket udpServerSocket; //сокет сервера
     QFile log;
 };
 

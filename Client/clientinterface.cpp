@@ -32,7 +32,7 @@ ClientInterface::~ClientInterface()
 }
 void ClientInterface::attemptConnection()   //слот вызова подключения к серверу
 {
-    chatClient->connectToServer();
+    chatClient->sendDatagram();
 }
 void ClientInterface::connectedToServer()   //слот подключения к серверу
 {
@@ -68,7 +68,6 @@ void ClientInterface::messageReceived(QString text)   //слот получен�
         int newRow = chatModel->rowCount();   //сохранение количества строк в чате
         chatModel->insertRows(newRow, 1);
         text.replace(":",":\n");
-        qDebug()<<text;
         chatModel->setData(chatModel->index(newRow, 0), text);
         chatModel->setData(chatModel->index(newRow, 0), int(Qt::AlignLeft | Qt::AlignVCenter), Qt::TextAlignmentRole);
         auto item = chatModel->item(newRow, 0);

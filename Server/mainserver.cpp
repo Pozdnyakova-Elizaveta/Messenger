@@ -15,6 +15,8 @@ MainServer::MainServer(QObject *parent)
         QByteArray data = str.toUtf8();
         log.write(data);
     }
+    udpServerSocket.bind(2323, QUdpSocket::ShareAddress);
+    connect(&udpServerSocket, &QUdpSocket::readyRead, this, &MainServer::udpAnswer);
 }
 
 MainServer::~MainServer()
@@ -62,7 +64,6 @@ void MainServer::sendEveryone(QString message)    //слот отправки с
 void MainServer::searchClient(QString sender, QString message){
     int index = message.indexOf(":");
     QString login = message.split(":").at(0);
-    qDebug()<<"Ищем:"<<login;
     for (Server *worker : clients) {
         if (worker->getUserName()==login){
             worker->sendToClient(sender+message.remove(0, index));
@@ -90,5 +91,19 @@ void MainServer::sendLogMessage(QString message){
     {
         QByteArray data = QString(message+"\n").toUtf8();
         log.write(data);
+    }
+}
+void MainServer::udpAnswer() {
+    while (udpServerSocket.hasPendingDatagrams())
+    {
+        QByteArray datagram;
+        datagram.resize(udpServerSocket.pendingDatagramSize());
+        QHostAddress sender;
+        quint16 senderPort;
+        udpServerSocket.readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
+        if (datagram=="BroadcastRequest"){
+            QByteArray senderAddress = sender.toString().toUtf8();
+            udpServerSocket.writeDatagram(senderAddress, sender, senderPort);
+        }
     }
 }
