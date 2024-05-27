@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QAbstractSocket>
+#include <QMenu>
 #include <QStandardItemModel>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -25,6 +26,8 @@ private:
     QStandardItemModel *chatModel;    //модель для представления данных, в нашем случае - вывода сообщений
     QString name;
     QString nameSender;
+    QString recipientUser;
+    QMenu menu;
 private slots:
     void connectedToServer();   //слот подключения к серверу
     void messageReceived(QString text);   //слот получения сообщения
@@ -32,6 +35,9 @@ private slots:
     void clearChat();
     void sendMessage(); //слот отправки сообщения
     void disconnectedFromServer(); //слот отключения от сервера
+    void forwardMessage(QModelIndex index);
+public slots:
+    void menuActivated(QAction *action);
 };
 
 #endif // CLIENTINTERFACE_H

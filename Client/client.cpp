@@ -34,7 +34,7 @@ void Client::onReadyRead() //слот для реакции на наличие 
     while (!in.atEnd()) {
         QByteArray byteArray = clientSocket->readLine();
         QString data = QString::fromUtf8(byteArray);
-        if (data.endsWith("\n")) data.chop(1);
+        if ((data.startsWith("CONNECT") || data.startsWith("DISCONNECT")) && data.endsWith("\n")) data.chop(1);
         messageReceived(data);
     }
 }
