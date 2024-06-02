@@ -53,6 +53,6 @@ void Client::onReadyRead() //слот для реакции на наличие 
         QByteArray byteArray = clientSocket->readLine();
         QString data = QString::fromUtf8(byteArray);
         if ((data.startsWith("CONNECT") || data.startsWith("DISCONNECT")) && data.endsWith("\n")) data.chop(1);
-        messageReceived(data);
+        emit messageReceived(data);
     }
 }

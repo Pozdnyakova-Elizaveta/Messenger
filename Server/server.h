@@ -21,6 +21,7 @@ signals:
     void messageReceived(QString str);  //сигнал получения сообщения
     void disconnectedFromClient(Server* server);  //сигнал отключения клиента
     void logMessage(QString str);
+    void getMessage(QString user1, QString user2);
 public slots:
     void disconnectFromClient();    //слот отключения клиента
 private slots:

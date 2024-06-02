@@ -1,7 +1,7 @@
 QT = core
 QT += network
 QT += widgets
-
+QT += sql
 CONFIG += c++17 cmdline
 
 # You can make your code fail to compile if it uses deprecated APIs.

@@ -17,6 +17,14 @@ MainServer::MainServer(QObject *parent)
     }
     udpServerSocket.bind(2323, QUdpSocket::ShareAddress);
     connect(&udpServerSocket, &QUdpSocket::readyRead, this, &MainServer::udpAnswer);
+    db = QSqlDatabase::addDatabase("QPSQL");
+    db.setDatabaseName("Messages");
+    db.setHostName("192.168.56.1");
+    db.setUserName("postgres");
+    db.setPassword("Postgres");
+    if (!db.open()) {
+        qDebug() << "Ошибка открытия базы данных:" << db.lastError().text();
+    }
 }
 
 MainServer::~MainServer()
@@ -45,6 +53,7 @@ void MainServer::incomingConnection(qintptr socketDescriptor)   //метод п�
     connect(server, SIGNAL(searchClient(QString, QString)), this, SLOT(searchClient(QString, QString)));
     connect(server, &Server::disconnectedFromClient, this, std::bind(&MainServer::disconnectClient, this, server));
     connect(server, SIGNAL(logMessage(QString)), this, SLOT(sendLogMessage(QString)));
+    connect(server, SIGNAL(getMessage(QString, QString)), this, SLOT(getMessagesSlot(QString, QString)));
     for (Server *worker : clients) {
         server->sendToClient("CONNECT:"+worker->getUserName()+"\n");
     }
@@ -66,6 +75,7 @@ void MainServer::searchClient(QString sender, QString message){
     QString login = message.split(":").at(0);
     for (Server *worker : clients) {
         if (worker->getUserName()==login){
+            addMessage(sender, message);
             worker->sendToClient(sender+message.remove(0, index));
             emit logMessage("Отправка сообщения, отправитель: "+sender+", получатель: "+worker->getUserName());
             if (log.isOpen())
@@ -104,6 +114,60 @@ void MainServer::udpAnswer() {
         if (datagram=="BroadcastRequest"){
             QByteArray senderAddress = sender.toString().toUtf8();
             udpServerSocket.writeDatagram(senderAddress, sender, senderPort);
+        }
+    }
+}
+void MainServer::getMessagesSlot(QString sender, QString recipient){
+    QSqlQuery queryMessage = QSqlQuery();
+    queryMessage.prepare("SELECT * FROM messages WHERE (sender = :searchsender and recipient = :searchrecipient) or (sender = :searchrecipient and recipient = :searchsender) order by pk");
+    queryMessage.bindValue(":searchsender", sender);
+    queryMessage.bindValue(":searchrecipient", recipient);
+    if(queryMessage.exec()) {
+        while(queryMessage.next()) {
+            QString message;
+            QString forwardField = queryMessage.value(3).toString();
+            QStringList forwards = forwardField.split(",");
+            if (forwards.size()>1 || (forwards.size()==1 && !forwards.at(0).isEmpty())){
+                for (QString item : forwards) {
+                    message = "переслано от "+item+":"+message;
+                }
+                message.remove("{").remove("}");
+            }
+            message = queryMessage.value(1).toString()+":"+message+queryMessage.value(4).toString();
+            for (Server *worker : clients) {
+                if (worker->getUserName()==sender) worker->sendToClient(message+"\n");
+            }
+        }
+    }
+    else {
+        QSqlError error = queryMessage.lastError();
+        qDebug() << "Ошибка выполнения запроса: " << error.text();
+    }
+}
+void MainServer::addMessage(QString sender, QString message){
+    QString recipient = message.split(":").at(0);
+    message.remove(0, message.indexOf(":")+1);
+    QStringList forward;
+    while (message.startsWith("переслано от")){
+        message.remove(0, 13);
+        forward.append(message.left(message.indexOf(":")));
+        message.remove(0, message.indexOf(":")+1);
+    }
+    QSqlQuery queryMessage = QSqlQuery();
+    if (!forward.isEmpty()) {
+        queryMessage.prepare("INSERT INTO messages (sender, recipient, forwardedusers, message) VALUES (:addsender, :addrecipient, :addforwardedusers, :addmessage)");
+        queryMessage.bindValue(":addforwardedusers", "{"+forward.join(",")+"}");
+    }
+    else queryMessage.prepare("INSERT INTO messages (sender, recipient, message) VALUES (:addsender, :addrecipient, :addmessage)");
+    queryMessage.bindValue(":addsender", sender);
+    queryMessage.bindValue(":addrecipient", recipient);
+    queryMessage.bindValue(":addmessage", message);
+    if(!queryMessage.exec()) {
+        emit logMessage("Не удалось сохранить сообщение "+recipient+" от "+sender);
+        if (log.isOpen())
+        {
+            QByteArray data = QString("Не удалось сохранить сообщение "+recipient+" от "+sender).toUtf8();
+            log.write(data);
         }
     }
 }

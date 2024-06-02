@@ -28,6 +28,7 @@ private:
     QString nameSender;
     QString recipientUser;
     QMenu menu;
+    void outputMessage(QString message, Qt::AlignmentFlag flag);
 private slots:
     void connectedToServer();   //слот подключения к серверу
     void messageReceived(QString text);   //слот получения сообщения
