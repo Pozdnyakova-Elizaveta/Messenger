@@ -49,38 +49,36 @@ void MainServer::incomingConnection(qintptr socketDescriptor)   //метод п�
         return;
     }
     //установка соединений сигналов объекта сервера для подключения клиентов со слотами основного сервера чата
-    connect(server, SIGNAL(sendEveryone(QString)), this, SLOT(sendEveryone(QString)));
-    connect(server, SIGNAL(searchClient(QString, QString)), this, SLOT(searchClient(QString, QString)));
+    connect(server, SIGNAL(sendEveryone(QString, QString)), this, SLOT(sendEveryone(QString, QString)));
+    connect(server, SIGNAL(searchClient(QString, QString, QString, QString)), this, SLOT(searchClient(QString, QString, QString, QString)));
     connect(server, &Server::disconnectedFromClient, this, std::bind(&MainServer::disconnectClient, this, server));
     connect(server, SIGNAL(logMessage(QString)), this, SLOT(sendLogMessage(QString)));
     connect(server, SIGNAL(getMessage(QString, QString)), this, SLOT(getMessagesSlot(QString, QString)));
     for (Server *worker : clients) {
-        server->sendToClient("CONNECT:"+worker->getUserName()+"\n");
+        server->sendStatusClient("CONNECT", worker->getUserName());
     }
     clients.append(server);
 }
 
-void MainServer::sendEveryone(QString message)    //слот отправки сообщений всем пользователям
+void MainServer::sendEveryone(QString status, QString message)    //слот отправки сообщений всем пользователям
 {
     for (Server *worker : clients) {
         Q_ASSERT(worker);
         if (worker == sender())
             continue;
-        worker->sendToClient(message);
+        worker->sendStatusClient(status, message);
     }
 }
 
-void MainServer::searchClient(QString sender, QString message){
-    int index = message.indexOf(":");
-    QString login = message.split(":").at(0);
+void MainServer::searchClient(QString sender, QString recipient, QString message, QString time){
     for (Server *worker : clients) {
-        if (worker->getUserName()==login){
-            addMessage(sender, message);
-            worker->sendToClient(sender+message.remove(0, index));
-            emit logMessage("Отправка сообщения, отправитель: "+sender+", получатель: "+worker->getUserName());
+        if (worker->getUserName()==recipient){
+            addMessage(sender, recipient, message, time);
+            worker->sendToClient(sender, message, time);
+            emit logMessage("Отправка сообщения, отправитель: "+sender+", получатель: "+recipient);
             if (log.isOpen())
             {
-                QByteArray data = QString("Отправка сообщения, отправитель: "+sender+", получатель: "+worker->getUserName()+"\n").toUtf8();
+                QByteArray data = QString("Отправка сообщения, отправитель: "+sender+", получатель: "+recipient+"\n").toUtf8();
                 log.write(data);
             }
         }
@@ -129,13 +127,14 @@ void MainServer::getMessagesSlot(QString sender, QString recipient){
             QStringList forwards = forwardField.split(",");
             if (forwards.size()>1 || (forwards.size()==1 && !forwards.at(0).isEmpty())){
                 for (QString item : forwards) {
-                    message = "переслано от "+item+":"+message;
+                    message = "переслано от "+item+":\n"+message;
                 }
                 message.remove("{").remove("}");
             }
-            message = queryMessage.value(1).toString()+":"+message+queryMessage.value(4).toString();
+            message = message+queryMessage.value(4).toString();
+            QString time = queryMessage.value(5).toString();
             for (Server *worker : clients) {
-                if (worker->getUserName()==sender) worker->sendToClient(message+"\n");
+                if (worker->getUserName()==sender) worker->sendToClient(queryMessage.value(1).toString(), message, time);
             }
         }
     }
@@ -144,24 +143,24 @@ void MainServer::getMessagesSlot(QString sender, QString recipient){
         qDebug() << "Ошибка выполнения запроса: " << error.text();
     }
 }
-void MainServer::addMessage(QString sender, QString message){
-    QString recipient = message.split(":").at(0);
-    message.remove(0, message.indexOf(":")+1);
+void MainServer::addMessage(QString sender, QString recipient, QString message, QString time){
     QStringList forward;
     while (message.startsWith("переслано от")){
         message.remove(0, 13);
         forward.append(message.left(message.indexOf(":")));
-        message.remove(0, message.indexOf(":")+1);
+        message.remove(0, message.indexOf("\n")+1);
     }
+    qDebug()<<message;
     QSqlQuery queryMessage = QSqlQuery();
     if (!forward.isEmpty()) {
-        queryMessage.prepare("INSERT INTO messages (sender, recipient, forwardedusers, message) VALUES (:addsender, :addrecipient, :addforwardedusers, :addmessage)");
+        queryMessage.prepare("INSERT INTO messages (sender, recipient, forwardedusers, message, time) VALUES (:addsender, :addrecipient, :addforwardedusers, :addmessage, :addtime)");
         queryMessage.bindValue(":addforwardedusers", "{"+forward.join(",")+"}");
     }
-    else queryMessage.prepare("INSERT INTO messages (sender, recipient, message) VALUES (:addsender, :addrecipient, :addmessage)");
+    else queryMessage.prepare("INSERT INTO messages (sender, recipient, message, time) VALUES (:addsender, :addrecipient, :addmessage, :addtime)");
     queryMessage.bindValue(":addsender", sender);
     queryMessage.bindValue(":addrecipient", recipient);
     queryMessage.bindValue(":addmessage", message);
+    queryMessage.bindValue(":addtime", QDateTime::fromString(time, "dd.MM.yyyy hh:mm"));
     if(!queryMessage.exec()) {
         emit logMessage("Не удалось сохранить сообщение "+recipient+" от "+sender);
         if (log.isOpen())

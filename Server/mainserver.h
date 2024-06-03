@@ -18,10 +18,10 @@ public:
     explicit MainServer(QObject *parent = nullptr);
     ~MainServer();
     void incomingConnection(qintptr socketDescriptor) override; //метод попытки подключения клиента к серверу
-    void addMessage(QString sender, QString message);
+    void addMessage(QString sender, QString recipient, QString message, QString time);
 private slots:
-    void sendEveryone(QString message);    //слот отправки сообщений всем пользователям
-    void searchClient(QString sender, QString message);
+    void sendEveryone(QString status, QString message);    //слот отправки сообщений всем пользователям
+    void searchClient(QString sender, QString recipient, QString message, QString time);
     void disconnectClient(Server* sender);
     void sendLogMessage(QString message);
     void udpAnswer();

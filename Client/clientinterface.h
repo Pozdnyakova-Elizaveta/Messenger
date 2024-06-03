@@ -31,7 +31,8 @@ private:
     void outputMessage(QString message, Qt::AlignmentFlag flag);
 private slots:
     void connectedToServer();   //слот подключения к серверу
-    void messageReceived(QString text);   //слот получения сообщения
+    void messageReceived(QString sender, QString text, QString time);
+    void statusReceived(QString status, QString user);
     void attemptConnection();   //слот вызова подключения к серверу
     void clearChat();
     void sendMessage(); //слот отправки сообщения

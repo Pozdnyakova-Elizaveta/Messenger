@@ -7,6 +7,9 @@
 #include <QDataStream>
 #include <QTime>
 #include <QDataStream>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
 
 class Client : public QObject   //класс логики клиента
 {
@@ -17,7 +20,8 @@ public:
 public slots:
     void connectToServer();     //слот для подключения к серверу
     void sendLogin(QString userName);    //слот для отправки логина
-    void sendMessage(QString text);  //слот для отправки сообщения
+    void sendMessage(QString sender, QString recipient, QString text);  //слот для отправки сообщения
+    void sendMessageRequest(QString sender, QString recipient);
     void disconnectFromServer();  //слот для отключения от сервера
     void sendDatagram();
 private slots:
@@ -25,7 +29,8 @@ private slots:
 signals:
     void connected();   //сигнал подключения к серверу
     void disconnected();    //сигнал отключения от сервера
-    void messageReceived(QString text);   //сигнал получения сообщения
+    void messageReceived(QString sender, QString text, QString time);   //сигнал получения сообщения
+    void statusReceived(QString status, QString user);
 private:
     QTcpSocket *clientSocket; //сокет клиента
     QUdpSocket *udpClientSocket; //сокет клиента

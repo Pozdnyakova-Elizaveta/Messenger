@@ -18,6 +18,7 @@ ClientInterface::ClientInterface(QWidget *parent)
     //установка соединения сигналов объекта логики со слотами объекта интерфейса
     connect(chatClient, &Client::connected, this, &ClientInterface::connectedToServer);   //соединение с сервером
     connect(chatClient, &Client::messageReceived, this, &ClientInterface::messageReceived);   //получение сообщения
+    connect(chatClient, &Client::statusReceived, this, &ClientInterface::statusReceived);   //получение сообщения
     connect(chatClient, &Client::disconnected, this, &ClientInterface::disconnectedFromServer);   //отключение от сервера
     //установка соединения сигналов элементов окна со слотами объекта интерфейса
     connect(ui->send, &QPushButton::clicked, this, &ClientInterface::sendMessage);  //отправка сообщений по нажатию кнопки
@@ -43,7 +44,7 @@ void ClientInterface::connectedToServer()   //слот подключения к
         if (newUsername.isEmpty()) QMessageBox::warning(nullptr, "Предупреждение", "Имя не было введено!");
     } while (newUsername.isEmpty());    //пока логин не будет введен
     name = newUsername;
-    chatClient->sendLogin(newUsername+"\n");   //отправка логина на сервер
+    chatClient->sendLogin(newUsername);   //отправка логина на сервер
     ui->userName->setText(name);
     //разблокировка элементов окна
     ui->send->setEnabled(true);
@@ -51,32 +52,25 @@ void ClientInterface::connectedToServer()   //слот подключения к
     ui->chat->setEnabled(true);
     ui->connect->setEnabled(false);
     ui->connect->setVisible(false);
-    if (!ui->userBox->currentText().isEmpty()) {
-        chatClient->sendMessage("GET MESSAGES:"+name+":"+ui->userBox->currentText());
-    }
 }
 
-void ClientInterface::messageReceived(QString text)   //слот получения сообщения
+void ClientInterface::messageReceived(QString sender, QString text, QString time)   //слот получения сообщения
 {
-    int index = text.indexOf(":");  //индекс разделения логина отправителя и сообщения
-    if (text.split(":").at(0)=="CONNECT")
-        ui->userBox->addItem(text.remove(0, index+1));
-    else if (text.split(":").at(0)=="DISCONNECT")
-        ui->userBox->removeItem(ui->userBox->findText(text.remove(0, index+1)));
-    else{
-        QString sender = text.split(":").at(0);
-        qDebug()<<sender<<" "<<name;
-        text.replace(":",":\n");
-        if (sender==name) outputMessage(text, Qt::AlignRight);
-        else outputMessage(text, Qt::AlignLeft);
-    }
+    if (sender!=name) outputMessage(sender+":\n"+text+"\n"+time, Qt::AlignLeft);
+    else outputMessage(sender+":\n"+text+"\n"+time, Qt::AlignRight);
 }
-
+void ClientInterface::statusReceived(QString status, QString user){
+    qDebug()<<user;
+    if (status=="CONNECT")
+        ui->userBox->addItem(user);
+    if (status=="DISCONNECT")
+        ui->userBox->removeItem(ui->userBox->findText(user));
+}
 void ClientInterface::sendMessage() //слот отправки сообщения
 {
     if (ui->userBox->count()==0) return;
-    chatClient->sendMessage(ui->userBox->currentText()+":"+ui->message->text()); //вызов слота отправки из объекта логики
-    QString message = name + ":\n" +ui->message->text();
+    chatClient->sendMessage(name, ui->userBox->currentText(), ui->message->text()); //вызов слота отправки из объекта логики
+    QString message = name + ":\n" +ui->message->text()+"\n"+QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm");
     outputMessage(message, Qt::AlignRight);
     ui->message->clear();
     ui->chat->scrollToBottom();
@@ -95,11 +89,13 @@ void ClientInterface::disconnectedFromServer() //слот отключения �
 }
 void ClientInterface::clearChat(){
     chatModel->removeRows(0, chatModel->rowCount());
-    if (!ui->userBox->currentText().isEmpty() && !name.isEmpty()) chatClient->sendMessage("GET MESSAGES:"+name+":"+ui->userBox->currentText());
+    if (!ui->userBox->currentText().isEmpty() && !name.isEmpty())
+        chatClient->sendMessageRequest(name, ui->userBox->currentText());
 }
 void ClientInterface::forwardMessage(QModelIndex index){
     recipientUser = index.data(Qt::DisplayRole).toString();
-    recipientUser.replace("\n","");
+    int ind = recipientUser.lastIndexOf('\n'); // находим индекс символа перехода на новую строку
+    recipientUser = recipientUser.left(ind);
     menu.clear();
     QMenu *recentFilesMenu = menu.addMenu("Переслать пользователю:");
     for (int i=0; i!=ui->userBox->count(); i++){
@@ -108,11 +104,9 @@ void ClientInterface::forwardMessage(QModelIndex index){
     menu.exec(QCursor::pos());
 }
 void ClientInterface::menuActivated(QAction *action){
-    QString message = ":переслано от "+recipientUser;
-    chatClient->sendMessage(action->text()+message);
-    message.replace(":",":\n");
-    int newRow = chatModel->rowCount();   //сохранение количества строк в чате
-    outputMessage(name+message, Qt::AlignRight);
+    QString message = "переслано от "+recipientUser;
+    chatClient->sendMessage(name, action->text(), message);
+    outputMessage(name+":\n"+message+"\n"+QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm"), Qt::AlignRight);
 }
 void ClientInterface::outputMessage(QString message, Qt::AlignmentFlag flag){
     int newRow = chatModel->rowCount();   //сохранение количества строк в чате
