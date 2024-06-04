@@ -9,7 +9,7 @@ CONFIG += c++17 cmdline
 
 SOURCES += \
         client.cpp \
-        clientinterface.cpp \
+        clientwindow.cpp \
         main.cpp
 
 # Default rules for deployment.
@@ -19,7 +19,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     client.h \
-    clientinterface.h
+    clientwindow.h
 
 FORMS += \
-    clientinterface.ui
+    clientwindow.ui

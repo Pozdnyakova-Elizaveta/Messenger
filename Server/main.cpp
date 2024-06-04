@@ -1,9 +1,9 @@
 #include <QApplication>
-#include "serverinterface.h"
+#include "serverwindow.h"
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    ServerInterface server;
+    ServerWindow server;
     server.show();
     return a.exec();
 }

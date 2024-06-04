@@ -1,9 +1,9 @@
 #include <QApplication>
-#include "clientinterface.h".h"
+#include "clientwindow.h"
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    ClientInterface interface;
+    ClientWindow interface;
     interface.show();
     return a.exec();
 }

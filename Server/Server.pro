@@ -11,8 +11,8 @@ CONFIG += c++17 cmdline
 SOURCES += \
         main.cpp \
         mainserver.cpp \
-        server.cpp \
-        serverinterface.cpp
+        serverconnection.cpp \
+        serverwindow.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -21,8 +21,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     mainserver.h \
-    server.h \
-    serverinterface.h
+    serverconnection.h \
+    serverwindow.h
 
 FORMS += \
-    serverinterface.ui
+    serverwindow.ui

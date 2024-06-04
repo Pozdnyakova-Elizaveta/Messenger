@@ -4,35 +4,34 @@
 #include <QTcpServer>
 #include <QUdpSocket>
 #include <QDateTime>
-#include "server.h"
+#include "serverconnection.h"
 #include <QFile>
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 
-class MainServer: public QTcpServer //класс сервера чата
+class MainServer: public QTcpServer //класс главного сервера чата, объединяющего все подключения
 {
-    Q_OBJECT    //подключение мета-объектной системы
-    Q_DISABLE_COPY(MainServer)  //отключение копирования
+    Q_OBJECT    //подключение системы сигналов-слотов
 public:
     explicit MainServer(QObject *parent = nullptr);
     ~MainServer();
-    void incomingConnection(qintptr socketDescriptor) override; //метод попытки подключения клиента к серверу
-    void addMessage(QString sender, QString recipient, QString message, QString time);
+    void incomingConnection(qintptr socketDescriptor) override; //метод подключения клиента к серверу
 private slots:
-    void sendEveryone(QString status, QString message);    //слот отправки сообщений всем пользователям
-    void searchClient(QString sender, QString recipient, QString message, QString time);
-    void disconnectClient(Server* sender);
-    void sendLogMessage(QString message);
-    void udpAnswer();
-    void getMessagesSlot(QString sender, QString recipient);
+    void sendEveryone(QString status, QString message);    //слот отправки особщения о статусе пользователя всем пользователям
+    void searchClient(QString sender, QString recipient, QString message, QString time);     //слот поиска пользователя для отправки сообщения
+    void disconnectClient(ServerConnection* sender);  //слот отключения клиента
+    void sendLogMessage(QString message);   //слот отправки сообщения лога графическому интерфейсу
+    void udpAnswer();   //слот отправки ответной датаграммы клиенту
+    void getMessages(QString sender, QString recipient);    //слот получения сообщений диалога из базы данных
 signals:
-    void logMessage(QString message);
+    void logMessage(QString message);   //сигнал отправки лога
 private:
-    QVector<Server *> clients;    //список подключенных клиентов
-    QUdpSocket udpServerSocket; //сокет сервера
-    QFile log;
-    QSqlDatabase db;
+    void addMessage(QString sender, QString recipient, QString message, QString time);  //метод добавления нового сообщения в базу данных
+    QVector<ServerConnection *> clients;    //список подключенных клиентов
+    QUdpSocket udpServerSocket;   //udp-сокет сервера
+    QFile log;  //файл для записи логов
+    QSqlDatabase db;    //объект подключения к базе данных
 };
 
 #endif // CHATSERVER_H
