@@ -18,6 +18,7 @@ public:
 private:
     Ui::ServerWindow *ui;    //объект графического интерфейса
     MainServer *mainServer;   //основной объект сервера
+
 private slots:
     void outputLogMessage(QString message); //слот для вывода логов
 };

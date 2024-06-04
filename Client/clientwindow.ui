@@ -13,100 +13,61 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QPushButton" name="connect">
-   <property name="geometry">
-    <rect>
-     <x>180</x>
-     <y>350</y>
-     <width>171</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Подключение</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="message">
-   <property name="geometry">
-    <rect>
-     <x>90</x>
-     <y>390</y>
-     <width>231</width>
-     <height>25</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="text">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>390</y>
-     <width>54</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Текст</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="send">
-   <property name="geometry">
-    <rect>
-     <x>390</x>
-     <y>390</y>
-     <width>80</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Отправить</string>
-   </property>
-  </widget>
-  <widget class="QListView" name="chat">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>70</y>
-     <width>381</width>
-     <height>261</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>40</y>
-     <width>231</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Выберите получателя сообщения</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="userBox">
-   <property name="geometry">
-    <rect>
-     <x>270</x>
-     <y>40</y>
-     <width>211</width>
-     <height>25</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="userName">
-   <property name="geometry">
-    <rect>
-     <x>230</x>
      <y>10</y>
-     <width>54</width>
-     <height>17</height>
+     <width>481</width>
+     <height>411</height>
     </rect>
    </property>
-   <property name="text">
-    <string/>
-   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="1" colspan="2" alignment="Qt::AlignVCenter">
+     <widget class="QLabel" name="userName">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1" colspan="2">
+     <widget class="QLineEdit" name="message"/>
+    </item>
+    <item row="1" column="0" colspan="2" alignment="Qt::AlignVCenter">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Выберите получателя сообщения</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2" colspan="2">
+     <widget class="QComboBox" name="userBox"/>
+    </item>
+    <item row="2" column="0" colspan="4">
+     <widget class="QListView" name="chat"/>
+    </item>
+    <item row="4" column="3">
+     <widget class="QPushButton" name="send">
+      <property name="text">
+       <string>Отправить</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+     <widget class="QLabel" name="text">
+      <property name="text">
+       <string>Текст</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1" colspan="2">
+     <widget class="QPushButton" name="connect">
+      <property name="text">
+       <string>Подключение</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

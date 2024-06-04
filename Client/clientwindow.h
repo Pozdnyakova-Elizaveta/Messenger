@@ -23,7 +23,7 @@ private:
     Ui::ClientWindow *ui;    //объект графического интерфейса
     Client *chatClient;   //объект логики клиента
     QStandardItemModel *chatModel;    //модель для вывода сообщений в окне
-    QString name;   //имя пользователя
+    QString username;   //имя пользователя
     QString forwardMessageText; //пересылаемое сообщение
     QMenu forwardingMenu; //меню для выбора пользователя для пересылки сообщения
     void outputMessage(QString message, Qt::AlignmentFlag flag);    //вывод сообщения в окне

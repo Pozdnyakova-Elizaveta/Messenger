@@ -41,11 +41,24 @@ void ClientWindow::connectedToServer()   //слот подключения к с
     QString newUsername;
     do {
         newUsername = QInputDialog::getText(this, tr("Введите логин"), tr("Логин: "));  //ввод в диалоговом окне логина пользователя
+        if (newUsername.isNull()) { //если нажата кнопка "Отмена"
+            chatClient->disconnected();
+            return;
+        }
         if (newUsername.isEmpty()) QMessageBox::warning(nullptr, "Предупреждение", "Имя не было введено!");
+        else {
+            for (int i=0; i!=ui->userBox->count(); i++){
+                if (newUsername==ui->userBox->itemText(i)){
+                    newUsername.clear();
+                    QMessageBox::warning(nullptr, "Предупреждение", "Такой пользователь уже в сети!");
+                }
+            }
+        }
     } while (newUsername.isEmpty());    //пока логин не будет введен
-    name = newUsername;
+    username = newUsername;
     chatClient->sendLogin(newUsername);   //отправка логина на сервер
-    ui->userName->setText(name);
+    ui->userName->setText(username);
+    ui->userName->setAlignment(Qt::AlignCenter);
     //разблокировка элементов окна
     ui->send->setEnabled(true);
     ui->message->setEnabled(true);
@@ -57,21 +70,23 @@ void ClientWindow::connectedToServer()   //слот подключения к с
 void ClientWindow::messageReceived(QString sender, QString text, QString time)   //слот получения сообщения
 {
     //вывод сообщения в зависимости от его отправителя
-    if (sender!=name) outputMessage(sender+":\n"+text+"\n"+time, Qt::AlignLeft);
-    else outputMessage(sender+":\n"+text+"\n"+time, Qt::AlignRight);
+    if (ui->userBox->currentText() == sender || sender == username){
+        if (sender!=username) outputMessage(sender + ":\n" + text + "\n" + time, Qt::AlignLeft);
+        else outputMessage(sender + ":\n" + text + "\n" + time, Qt::AlignRight);
+    }
 }
 void ClientWindow::statusReceived(QString status, QString user){    //слот получения данных об изменении статуса пользователя
-    if (status=="CONNECT")
+    if (status == "CONNECT")
         ui->userBox->addItem(user); //добавление пользователя в список, если он подключился
-    if (status=="DISCONNECT")
+    if (status == "DISCONNECT")
         ui->userBox->removeItem(ui->userBox->findText(user));   //удаление пользователя, если он отключился
 }
 void ClientWindow::sendMessage() //слот отправки сообщения
 {
-    if (ui->userBox->count()==0) return;
+    if (ui->userBox->count() == 0) return;
     QString time = QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm");   //получение текущей даты и времени
-    chatClient->sendMessage(name, ui->userBox->currentText(), ui->message->text(), time); //вызов отправки сообщения из объекта логики
-    QString message = name + ":\n" +ui->message->text()+"\n"+time;
+    chatClient->sendMessage(username, ui->userBox->currentText(), ui->message->text(), time); //вызов отправки сообщения из объекта логики
+    QString message = username + ":\n" + ui->message->text() + "\n" + time;
     outputMessage(message, Qt::AlignRight); //вывод отправленного сообщения
     ui->message->clear();
     ui->chat->scrollToBottom();
@@ -90,8 +105,8 @@ void ClientWindow::disconnectedFromServer() //слот отключения от
 }
 void ClientWindow::updateChat(){    //слот изменения чата
     chatModel->removeRows(0, chatModel->rowCount());    //очистка вывода чата
-    if (!ui->userBox->currentText().isEmpty() && !name.isEmpty())
-        chatClient->sendMessageRequest(name, ui->userBox->currentText());   //запрос на получение сообщений с выбранным пользователем
+    if (!ui->userBox->currentText().isEmpty() && !username.isEmpty())
+        chatClient->sendMessageRequest(username, ui->userBox->currentText());   //запрос на получение сообщений с выбранным пользователем
 }
 void ClientWindow::openForwardMenu(QModelIndex index){  //слот открытия меню пересылки
     forwardMessageText = index.data(Qt::DisplayRole).toString();    //сохраняем пересылаемое сообщение
@@ -106,8 +121,8 @@ void ClientWindow::openForwardMenu(QModelIndex index){  //слот открыт�
 void ClientWindow::forwardMessage(QAction *action){ //слот пересылки сообщения
     QString message = "переслано от " + forwardMessageText;
     QString time = QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm");
-    chatClient->sendMessage(name, action->text(), message, time);   //отправка сообщения
-    outputMessage(name + ":\n" + message + "\n" + time, Qt::AlignRight);    //вывод сообщения
+    chatClient->sendMessage(username, action->text(), message, time);   //отправка сообщения
+    outputMessage(username + ":\n" + message + "\n" + time, Qt::AlignRight);    //вывод сообщения
 }
 void ClientWindow::outputMessage(QString message, Qt::AlignmentFlag flag){  //вывод сообщения
     int newRow = chatModel->rowCount();   //сохранение количества строк в чате

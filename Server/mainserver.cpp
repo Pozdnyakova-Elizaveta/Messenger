@@ -57,18 +57,19 @@ void MainServer::incomingConnection(qintptr socketDescriptor)   //метод п�
     connect(connection, &ServerConnection::disconnectedFromClient, this, std::bind(&MainServer::disconnectClient, this, connection)); //отключение клиента
     connect(connection, SIGNAL(logMessage(QString)), this, SLOT(sendLogMessage(QString)));  //передача сообщения-лога
     connect(connection, SIGNAL(getMessages(QString, QString)), this, SLOT(getMessages(QString, QString)));   //получение сообщений из базы данных
+    connection->start();
     for (ServerConnection *worker : clients) {
         connection->sendStatusToClient("CONNECT", worker->getUserName()); //отправка новому пользователю списка всех подключенных клиентов
     }
     clients.append(connection); //добавление подключения в список
 }
 
-void MainServer::sendEveryone(QString status, QString message)    //слот отправки сообщений о статусе пользователя всем пользователям
+void MainServer::sendEveryone(QString status, QString userName)    //слот отправки сообщений о статусе пользователя всем пользователям
 {
     for (ServerConnection *worker : clients) {
         if (worker == sender()) //не отправляем сообщение отправителю
             continue;
-        worker->sendStatusToClient(status, message);    //остальным - отправляем сообщение
+        worker->sendStatusToClient(status, userName);    //остальным - отправляем сообщение
     }
 }
 
