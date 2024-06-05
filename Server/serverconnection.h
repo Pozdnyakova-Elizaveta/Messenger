@@ -16,7 +16,7 @@ class ServerConnection : public QObject   //класс подключения с
 
 public:
     explicit ServerConnection(QObject *parent = nullptr);
-    virtual bool setSocketDescriptor(qintptr socketDescriptor); //установка значения сокета для соединения с клиентом
+    bool setSocketDescriptor(qintptr socketDescriptor); //установка значения сокета для соединения с клиентом
     QString getUserName();
     void sendToClient(QString sender, QString text, QString time); //отправка сообщения клиенту
     void sendStatusToClient(QString status, QString user);    //отправка данных об изменении статуса клиента

@@ -30,7 +30,7 @@ private:
     QSqlDatabase db;    //объект подключения к базе данных
 
 private slots:
-    void sendEveryone(QString status, QString userName);    //слот отправки особщения о статусе пользователя всем пользователям
+    void sendEveryone(QString status, QString userName);    //слот отправки сообщения о статусе пользователя всем пользователям
     void searchClient(QString sender, QString recipient, QString message, QString time);     //слот поиска пользователя для отправки сообщения
     void disconnectClient(ServerConnection* sender);  //слот отключения клиента
     void sendLogMessage(QString message);   //слот отправки сообщения лога графическому интерфейсу

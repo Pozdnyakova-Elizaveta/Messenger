@@ -31,7 +31,7 @@ signals:
     void statusReceived(QString status, QString user);  //сигнал получения данных об изменении состояния другого пользователя
 
 private:
-    QSslSocket *clientSocket; //TCP-сокет клиента
+    QSslSocket *clientSocket; //SSL-сокет клиента
     QUdpSocket *udpClientSocket; //UDP-сокет клиента
     void connectToServer(QString IPServer, QString IPClient, quint16 port);     //метод для подключения к серверу по полученному IP-адресу
 
