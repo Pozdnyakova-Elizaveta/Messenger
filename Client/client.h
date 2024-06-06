@@ -6,7 +6,6 @@
 #include <QSslConfiguration>
 #include <QSslKey>
 #include <QSslPreSharedKeyAuthenticator>
-#include <QUdpSocket>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QRegularExpression>
@@ -22,8 +21,7 @@ public:
     void sendLogin(QString userName);    //метод для отправки логина на сервер
     void sendMessage(QString sender, QString recipient, QString text, QString time);  //метод для отправки сообщения на сервер
     void sendMessageRequest(QString sender, QString recipient); //метод для отправки запроса на получение сообщений с базы данных
-    void sendDatagram();    //метод отправки датаграммы для определения адреса сервера
-
+    void connectToServer();     //метод для подключения к серверу по полученному IP-адресу
 signals:
     void connected();   //сигнал подключения к серверу
     void disconnected();    //сигнал отключения от сервера
@@ -32,12 +30,10 @@ signals:
 
 private:
     QSslSocket *clientSocket; //SSL-сокет клиента
-    QUdpSocket *udpClientSocket; //UDP-сокет клиента
-    void connectToServer(QString IPServer, QString IPClient, quint16 port);     //метод для подключения к серверу по полученному IP-адресу
+    const QString IP_SERVER = "192.168.56.1";   //IP-адрес сервера
 
 private slots:
     void read(); //слот для чтения данных с сокета
-    void readDatagram();    //слот для чтения полученной датаграммы
     void handlingSslError(const QList<QSslError>& errors);   //слот для обработки ошибок ssl
 };
 

@@ -16,14 +16,14 @@ ClientWindow::ClientWindow(QWidget *parent)
     ui->message->setEnabled(false);
     ui->userBox->addItem("");
     //установка соединения сигналов объекта логики со слотами объекта интерфейса
-    connect(chatClient, &Client::connected, this, &ClientWindow::connectedToServer);   //соединение с сервером
+    connect(chatClient, &Client::connected, this, &ClientWindow::login);   //вход в систему
     connect(chatClient, &Client::messageReceived, this, &ClientWindow::messageReceived);   //получение сообщения пользователя
     connect(chatClient, &Client::statusReceived, this, &ClientWindow::statusReceived);   //получение сообщения о смене статуса пользователя
     connect(chatClient, &Client::disconnected, this, &ClientWindow::disconnectedFromServer);   //отключение от сервера
     //установка соединения сигналов элементов окна со слотами объекта интерфейса
     connect(ui->send, &QPushButton::clicked, this, &ClientWindow::sendMessage);  //отправка сообщений по нажатию кнопки
     connect(ui->message, &QLineEdit::returnPressed, this, &ClientWindow::sendMessage);  //отправка сообщений по нажатию enter в lineEdit
-    connect(ui->connect, &QPushButton::clicked, this, &ClientWindow::searchServer); //поиск сервера по нажатию кнопки
+    connect(ui->connect, &QPushButton::clicked, this, &ClientWindow::connected); //поиск сервера по нажатию кнопки
     connect(ui->userBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ClientWindow::updateChat);  //обновление чата при выборе другого пользователя из списка
     connect(ui->chat, SIGNAL(clicked(QModelIndex)), this, SLOT(openForwardMenu(QModelIndex)));   //при нажатии на сообщение - переход к меню пересылки сообщения
     connect(&forwardingMenu, &QMenu::triggered, this, &ClientWindow::forwardMessage);  //при выборе в меню пользователя для пересылки - пересылка сообщения
@@ -32,11 +32,11 @@ ClientWindow::~ClientWindow()
 {
     delete ui;
 }
-void ClientWindow::searchServer()   //слот вызова определения IP сервера
+void ClientWindow::connected()   //слот вызова подключения к серверу
 {
-    chatClient->sendDatagram();
+    chatClient->connectToServer();
 }
-void ClientWindow::connectedToServer()   //слот подключения к серверу
+void ClientWindow::login()   //слот входа в систему
 {
     QString newUsername;
     do {

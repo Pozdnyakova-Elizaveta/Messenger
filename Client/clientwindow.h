@@ -28,10 +28,10 @@ private:
     QMenu forwardingMenu; //меню для выбора пользователя для пересылки сообщения
     void outputMessage(QString message, Qt::AlignmentFlag flag);    //вывод сообщения в окне
 private slots:
-    void connectedToServer();   //слот подключения к серверу
+    void login();   //слот входа в систему
     void messageReceived(QString sender, QString text, QString time);   //слот для получения сообщения пользователя
     void statusReceived(QString status, QString user);  //слот для получения данных об изменении статуса пользователя
-    void searchServer();   //слот вызова определения IP сервера
+    void connected();   //слот вызова подключения к серверу
     void updateChat();  //слот обновления чата при выборе другого пользователя для переписки
     void sendMessage(); //слот отправки сообщения пользователю
     void disconnectedFromServer(); //слот отключения от сервера

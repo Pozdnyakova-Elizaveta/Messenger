@@ -3,7 +3,6 @@
 Client::Client(QObject *parent)
     : QObject(parent)
     , clientSocket(new QSslSocket(this))
-    , udpClientSocket(new QUdpSocket(this))
 {
     QSslConfiguration sslConfig;    //конфигурация ssl соединения
     sslConfig.setProtocol(QSsl::TlsV1_2);    //задаем протокол TLS 1.2
@@ -28,7 +27,6 @@ Client::Client(QObject *parent)
     connect(clientSocket, &QSslSocket::disconnected, this, &Client::disconnected);  //отключение клиента от сервера
     connect(clientSocket, &QSslSocket::readyRead, this, &Client::read);    //получение данных с сокета
     connect(clientSocket, SIGNAL(sslErrors(const QList<QSslError> &)), this, SLOT(handlingSslError(const QList<QSslError> &))); //обработка ошибок ssl соединения
-    connect(udpClientSocket, &QUdpSocket::readyRead, this, &Client::readDatagram);   //чтение датаграммы
 }
 void Client::sendLogin(QString userName){   //отправка логина на сервер
     QJsonObject message;    //формирование json-объекта из типа сообщения и логина
@@ -58,28 +56,8 @@ void Client::sendMessage(QString sender, QString recipient, QString text, QStrin
     clientStream << QJsonDocument(message).toJson();    //отправка json
 }
 
-void Client::readDatagram()     //чтение датаграммы
-{
-    while (udpClientSocket->hasPendingDatagrams())  //пока в сокете есть датаграммы для чтения
-    {
-        QByteArray datagram;
-        datagram.resize(udpClientSocket->pendingDatagramSize());    //задаем размер массива байтов равный размеру датаграммы
-        QHostAddress sender;
-        quint16 senderPort;
-        udpClientSocket->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);  //получение данных с датаграммы
-        QRegularExpression reg("[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}");   //выражение для проверки, является ли строка ip-адресом
-        if (reg.match(datagram).hasMatch()){ //если ip-адрес содержится в датаграмме
-            connectToServer(datagram, sender.toString(), senderPort);   //выполнение подключения к серверу
-        }
-    }
-}
-void Client::connectToServer(QString IPServer, QString IPClient, quint16 port){ //подключение к серверу по полученному IP-адресу
-    if (IPServer==IPClient) clientSocket->connectToHostEncrypted("127.0.0.1", port);  //ip-адреса сервера и клиента равны - сервер и клиент на одном компьютере, адрес - localhost
-    else clientSocket->connectToHostEncrypted(IPServer, port);    //иначе - подключение по полученному адресу сервера
-}
-void Client::sendDatagram(){    //отправка датаграммы широковещательным запросом
-    QByteArray datagram = "BroadcastRequest";
-    udpClientSocket->writeDatagram(datagram, QHostAddress::Broadcast, 2323);
+void Client::connectToServer(){ //подключение к серверу
+    clientSocket->connectToHostEncrypted(IP_SERVER, 2323);
 }
 void Client::read() //слот для чтения данных с сокета
 {

@@ -5,7 +5,7 @@ MainServer::MainServer(QObject *parent)
 {
     //задаем ip-адрес и порт
     quint16 port = 2323;
-    this->listen(QHostAddress::LocalHost, port);
+    this->listen(QHostAddress::Any, port);
     log.setFileName("log.txt"); //открываем файл для записи логов
     log.open(QIODevice::Append | QIODevice::Text);
     if (log.isOpen())
@@ -15,8 +15,6 @@ MainServer::MainServer(QObject *parent)
         QByteArray data = str.toUtf8();
         log.write(data);
     }
-    udpServerSocket.bind(2323, QUdpSocket::ShareAddress);
-    connect(&udpServerSocket, &QUdpSocket::readyRead, this, &MainServer::udpAnswer);    //устанавливаем соединение сигнала и слота для ответа на датаграммы клиентов
     //задаем параметры базы данных
     db = QSqlDatabase::addDatabase("QPSQL");
     db.setDatabaseName("Messages");
@@ -102,20 +100,6 @@ void MainServer::sendLogMessage(QString message){   //слот отправки 
     {
         QByteArray data = QString(message+"\n").toUtf8();
         log.write(data);
-    }
-}
-void MainServer::udpAnswer() {  //слот ответа на датаграмму клиента
-    while (udpServerSocket.hasPendingDatagrams())   //пока в сокете есть датаграммы для чтения
-    {
-        QByteArray datagram;
-        datagram.resize(udpServerSocket.pendingDatagramSize()); //задаем размер массива байтов равный размеру датаграммы
-        QHostAddress sender;
-        quint16 senderPort;
-        udpServerSocket.readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);  //получение данных с датаграммы
-        if (datagram=="BroadcastRequest"){  //если датаграмма пришла с тем же текстом, который отправил пользователь
-            QByteArray senderAddress = sender.toString().toUtf8();
-            udpServerSocket.writeDatagram(senderAddress, sender, senderPort);   //отправляем датаграмму с IP-адресом пользователя
-        }
     }
 }
 void MainServer::getMessages(QString sender, QString recipient){    //слот получения сообщений из базы данных
